@@ -56,12 +56,22 @@ bool writeBMP(const std::string& filename, const BMPHeader& bmpHeader, const DIB
     return true;
 }
 
-void rotate90(std::vector<std::vector<Pixel>>& pixels) {
+void rotate90Clockwise(std::vector<std::vector<Pixel>>& pixels) {
     int h = pixels.size();
     int w = pixels[0].size();
     std::vector<std::vector<Pixel>> rotated(w, std::vector<Pixel>(h));
     for(int y = 0; y < h; ++y)
         for(int x = 0; x < w; ++x)
-            rotated[x][h - y -1] = pixels[y][x];
+            rotated[x][h - y - 1] = pixels[y][x];
+    pixels = rotated;
+}
+
+void rotate90CounterClockwise(std::vector<std::vector<Pixel>>& pixels) {
+    int h = pixels.size();
+    int w = pixels[0].size();
+    std::vector<std::vector<Pixel>> rotated(w, std::vector<Pixel>(h));
+    for(int y = 0; y < h; ++y)
+        for(int x = 0; x < w; ++x)
+            rotated[w - x - 1][y] = pixels[y][x];
     pixels = rotated;
 }

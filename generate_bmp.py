@@ -1,30 +1,57 @@
+width = 200
+height = 100
+
+# BMP и DIB заголовки
+bmp_header = bytearray([
+    0x42, 0x4D,             # Signature 'BM'
+    0, 0, 0, 0,             # File size (will fill later)
+    0, 0,                   # Reserved
+    0, 0,                   # Reserved
+    54, 0, 0, 0             # Offset to pixel data
+])
+
+dib_header = bytearray([
+    40, 0, 0, 0,            # Header size
+    width & 0xFF, (width >> 8) & 0xFF, 0, 0,  # Width
+    height & 0xFF, (height >> 8) & 0xFF, 0, 0,  # Height
+    1, 0,                  # Color planes
+    24, 0,                 # Bits per pixel
+    0, 0, 0, 0,            # Compression
+    0, 0, 0, 0,            # Image size (can be zero for no compression)
+    0x13, 0x0B, 0, 0,      # X pixels per meter
+    0x13, 0x0B, 0, 0,      # Y pixels per meter
+    0, 0, 0, 0,            # Total colors
+    0, 0, 0, 0             # Important colors
+])
+
+# Пиксельные данные
+row_padding = (4 - (width * 3) % 4) % 4
+row_size = width * 3 + row_padding
+pixel_data = bytearray()
+
+for y in range(height):
+    row = bytearray()
+    for x in range(width):
+        if (x == width // 2 and y == height // 2):
+            row += bytes([255, 0, 0])   # Синяя точка
+        elif (x == width // 2 + 10 and y == height // 2):
+            row += bytes([0, 255, 0])   # Зелёная точка
+        elif (x == width // 2 - 10 and y == height // 2):
+            row += bytes([0, 0, 255])   # Красная точка
+        else:
+            row += bytes([255, 255, 255])  # Белый фон
+    row += bytes(row_padding)  # Добавляем паддинг
+    pixel_data = row + pixel_data  # BMP сохраняет снизу вверх!
+
+# Теперь размер файла
+file_size = 54 + len(pixel_data)
+bmp_header[2] = file_size & 0xFF
+bmp_header[3] = (file_size >> 8) & 0xFF
+bmp_header[4] = (file_size >> 16) & 0xFF
+bmp_header[5] = (file_size >> 24) & 0xFF
+
+# Сохраняем
 with open("input.bmp", "wb") as f:
-    f.write(
-        bytes.fromhex(
-            # BMP Header (14 bytes)
-            "42 4D"        # Signature "BM"
-            "3E 00 00 00"  # File size = 62 bytes
-            "00 00"        # Reserved
-            "00 00"        # Reserved
-            "36 00 00 00"  # Offset to pixel data = 54
-
-            # DIB Header (40 bytes)
-            "28 00 00 00"  # DIB header size = 40 bytes
-            "02 00 00 00"  # Width = 2
-            "02 00 00 00"  # Height = 2
-            "01 00"        # Color planes = 1
-            "18 00"        # Bits per pixel = 24
-            "00 00 00 00"  # Compression = 0
-            "08 00 00 00"  # Image size = 8 bytes
-            "13 0B 00 00"  # X pixels per meter
-            "13 0B 00 00"  # Y pixels per meter
-            "00 00 00 00"  # Colors in palette
-            "00 00 00 00"  # Important colors
-
-            # Pixel data (2x2 pixels, bottom-up, BGR, each row padded to 4 bytes)
-            "FF 00 00 00"  # Red (with 1 byte padding)
-            "00 FF 00 00"  # Green (with 1 byte padding)
-            "00 00 FF 00"  # Blue (with 1 byte padding)
-            "FF FF FF 00"  # White (with 1 byte padding)
-        )
-    )
+    f.write(bmp_header)
+    f.write(dib_header)
+    f.write(pixel_data)

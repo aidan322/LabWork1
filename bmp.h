@@ -35,6 +35,7 @@ struct Pixel {
 
 bool readBMP(const std::string& filename, BMPHeader& bmpHeader, DIBHeader& dibHeader, std::vector<std::vector<Pixel>>& pixels);
 bool writeBMP(const std::string& filename, const BMPHeader& bmpHeader, const DIBHeader& dibHeader, const std::vector<std::vector<Pixel>>& pixels);
-void rotate90(std::vector<std::vector<Pixel>>& pixels);
+void rotate90Clockwise(std::vector<std::vector<Pixel>>& pixels);
+void rotate90CounterClockwise(std::vector<std::vector<Pixel>>& pixels);
 
 #endif
